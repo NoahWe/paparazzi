@@ -83,6 +83,13 @@ extern struct RotWingStateSettings rotwing_state_settings;
 extern struct RotWingStateSkewing rotwing_state_skewing;
 
 extern float rotwing_state_max_hover_speed;
+extern float force_elevator_pprz_cmd;
+extern float force_rudder_pprz_cmd;
+extern float force_left_aileron_pprz_cmd;
+extern float force_right_aileron_pprz_cmd;
+extern float force_left_flap_pprz_cmd;
+extern float force_right_flap_pprz_cmd;
+extern bool bool_force_control_surfaces;
 
 extern bool hover_motors_active;
 extern bool bool_disable_hover_motors;

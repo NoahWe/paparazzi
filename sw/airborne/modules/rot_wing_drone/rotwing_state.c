@@ -136,6 +136,13 @@ uint8_t rotwing_state_fw_idle_counter = 0;
 uint8_t rotwing_state_fw_m_off_counter = 0;
 
 float rotwing_state_max_hover_speed = 7;
+float force_elevator_pprz_cmd = 0.f;
+float force_rudder_pprz_cmd = 0.f;
+float force_left_aileron_pprz_cmd = 0.f;
+float force_right_aileron_pprz_cmd = 0.f;
+float force_left_flap_pprz_cmd = 0.f;
+float force_right_flap_pprz_cmd = 0.f;
+bool bool_force_control_surfaces = false;
 
 bool hover_motors_active = true;
 bool bool_disable_hover_motors = false;
