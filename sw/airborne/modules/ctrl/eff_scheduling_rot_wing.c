@@ -148,7 +148,9 @@ struct rot_wing_eff_sched_param_t eff_sched_p = {
 
 float eff_sched_pusher_time = 0.002;
 
-float f = 1.f;
+float roll_eff_scaling = 1.f;
+float roll_roll_coeff_scaling = 1.f;
+bool use_tomaso_roll_scheduling = false;
 
 struct rot_wing_eff_sched_var_t eff_sched_var;
 
@@ -157,6 +159,7 @@ inline void eff_scheduling_rot_wing_update_MMOI(void);
 inline void eff_scheduling_rot_wing_update_cmd(void);
 inline void eff_scheduling_rot_wing_update_airspeed(void);
 inline void eff_scheduling_rot_wing_update_hover_motor_effectiveness(void);
+inline void eff_scheduling_rot_wing_update_hover_motor_effectiveness_tomaso(void);
 inline void eff_scheduling_rot_wing_update_elevator_effectiveness(void);
 inline void eff_scheduling_rot_wing_update_rudder_effectiveness(void);
 inline void eff_scheduling_rot_wing_update_aileron_effectiveness(void);
@@ -229,7 +232,11 @@ void eff_scheduling_rot_wing_periodic(void)
   eff_scheduling_rot_wing_update_airspeed();
 
   // Update the effectiveness values
-  eff_scheduling_rot_wing_update_hover_motor_effectiveness();
+  if (use_tomaso_roll_scheduling) {
+    eff_scheduling_rot_wing_update_hover_motor_effectiveness_tomaso();
+  } else {
+    eff_scheduling_rot_wing_update_hover_motor_effectiveness();
+  }
   eff_scheduling_rot_wing_update_elevator_effectiveness();
   eff_scheduling_rot_wing_update_rudder_effectiveness();
   eff_scheduling_rot_wing_update_aileron_effectiveness();
@@ -302,15 +309,15 @@ void eff_scheduling_rot_wing_update_hover_motor_effectiveness(void)
   Bound(dM_dpprz_right, eff_sched_var.roll_motor_dMdpprz * 0.5, eff_sched_var.roll_motor_dMdpprz * 2.0);
   Bound(dM_dpprz_left,  eff_sched_var.roll_motor_dMdpprz * 0.5, eff_sched_var.roll_motor_dMdpprz * 2.0);
 
-  float roll_motor_p_eff_right = -(dM_dpprz_right * eff_sched_var.cosr + eff_sched_p.hover_roll_roll_coef[0] * eff_sched_var.wing_rotation_rad * eff_sched_var.wing_rotation_rad * eff_sched_var.airspeed * eff_sched_var.cosr) / eff_sched_var.Ixx;
-  Bound(roll_motor_p_eff_right, -1, -0.00001);
+  float roll_motor_p_eff_right = -(dM_dpprz_right * eff_sched_var.cosr + roll_roll_coeff_scaling * eff_sched_p.hover_roll_roll_coef[0] * eff_sched_var.wing_rotation_rad * eff_sched_var.wing_rotation_rad * eff_sched_var.airspeed * eff_sched_var.cosr) / eff_sched_var.Ixx;
+  // Bound(roll_motor_p_eff_right, -1, -0.00001);
 
-  float roll_motor_p_eff_left = (dM_dpprz_left * eff_sched_var.cosr + eff_sched_p.hover_roll_roll_coef[0] * eff_sched_var.wing_rotation_rad * eff_sched_var.wing_rotation_rad * eff_sched_var.airspeed * eff_sched_var.cosr) / eff_sched_var.Ixx;
+  float roll_motor_p_eff_left = (dM_dpprz_left * eff_sched_var.cosr + roll_roll_coeff_scaling * eff_sched_p.hover_roll_roll_coef[0] * eff_sched_var.wing_rotation_rad * eff_sched_var.wing_rotation_rad * eff_sched_var.airspeed * eff_sched_var.cosr) / eff_sched_var.Ixx;
   if(autopilot.in_flight) {
     float roll_motor_airspeed_compensation = eff_sched_p.hover_roll_roll_coef[1] * eff_sched_var.airspeed * eff_sched_var.cosr / eff_sched_var.Ixx;
     roll_motor_p_eff_left += roll_motor_airspeed_compensation;
   }
-  Bound(roll_motor_p_eff_left, 0.00001, 1);
+  // Bound(roll_motor_p_eff_left, 0.00001, 1);
 
   float roll_motor_q_eff = (eff_sched_p.hover_roll_pitch_coef[0] * eff_sched_var.wing_rotation_rad + eff_sched_p.hover_roll_pitch_coef[1] * eff_sched_var.wing_rotation_rad * eff_sched_var.wing_rotation_rad * eff_sched_var.sinr) / eff_sched_var.Iyy;
   Bound(roll_motor_q_eff, 0, 1);
@@ -328,6 +335,11 @@ void eff_scheduling_rot_wing_update_hover_motor_effectiveness(void)
   // Update left motor p and q effectiveness
   g1g2[0][3] = roll_motor_p_eff_left;  // roll effectiveness left motor
   g1g2[1][3] = -roll_motor_q_eff;   // pitch effectiveness left motor
+}
+
+void eff_scheduling_rot_wing_update_hover_motor_effectiveness_tomaso(void) 
+{
+  
 }
 
 void eff_scheduling_rot_wing_update_elevator_effectiveness(void)
