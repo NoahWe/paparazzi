@@ -150,8 +150,6 @@ float eff_sched_pusher_time = 0.002;
 
 float roll_eff_scaling = 1.f;
 float roll_roll_coeff_scaling = 1.f;
-bool use_tomaso_roll_scheduling = false;
-
 struct rot_wing_eff_sched_var_t eff_sched_var;
 
 inline void eff_scheduling_rot_wing_update_wing_angle(void);
@@ -159,7 +157,6 @@ inline void eff_scheduling_rot_wing_update_MMOI(void);
 inline void eff_scheduling_rot_wing_update_cmd(void);
 inline void eff_scheduling_rot_wing_update_airspeed(void);
 inline void eff_scheduling_rot_wing_update_hover_motor_effectiveness(void);
-inline void eff_scheduling_rot_wing_update_hover_motor_effectiveness_tomaso(void);
 inline void eff_scheduling_rot_wing_update_elevator_effectiveness(void);
 inline void eff_scheduling_rot_wing_update_rudder_effectiveness(void);
 inline void eff_scheduling_rot_wing_update_aileron_effectiveness(void);
@@ -230,13 +227,7 @@ void eff_scheduling_rot_wing_periodic(void)
   eff_scheduling_rot_wing_update_MMOI();
   eff_scheduling_rot_wing_update_cmd();
   eff_scheduling_rot_wing_update_airspeed();
-
-  // Update the effectiveness values
-  if (use_tomaso_roll_scheduling) {
-    eff_scheduling_rot_wing_update_hover_motor_effectiveness_tomaso();
-  } else {
-    eff_scheduling_rot_wing_update_hover_motor_effectiveness();
-  }
+  eff_scheduling_rot_wing_update_hover_motor_effectiveness();
   eff_scheduling_rot_wing_update_elevator_effectiveness();
   eff_scheduling_rot_wing_update_rudder_effectiveness();
   eff_scheduling_rot_wing_update_aileron_effectiveness();
