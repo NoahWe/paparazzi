@@ -328,11 +328,6 @@ void eff_scheduling_rot_wing_update_hover_motor_effectiveness(void)
   g1g2[1][3] = -roll_motor_q_eff;   // pitch effectiveness left motor
 }
 
-void eff_scheduling_rot_wing_update_hover_motor_effectiveness_tomaso(void) 
-{
-  
-}
-
 void eff_scheduling_rot_wing_update_elevator_effectiveness(void)
 {
   float de = eff_sched_p.k_elevator_deflection[0] + eff_sched_p.k_elevator_deflection[1] * eff_sched_var.cmd_elevator;
