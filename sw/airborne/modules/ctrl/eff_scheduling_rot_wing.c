@@ -123,6 +123,10 @@
 #error "NO ROT_WING_EFF_SCHED_K_LIFT_TAIL defined"
 #endif
 
+#ifndef ROLL_EFFECTIVENESS_CUTOFF
+#define ROLL_EFFECTIVENESS_CUTOFF 5e-4
+#endif
+
 struct rot_wing_eff_sched_param_t eff_sched_p = {
   .Ixx_body                 = ROT_WING_EFF_SCHED_IXX_BODY,
   .Iyy_body                 = ROT_WING_EFF_SCHED_IYY_BODY,
@@ -303,12 +307,20 @@ void eff_scheduling_rot_wing_update_hover_motor_effectiveness(void)
   float roll_motor_p_eff_right = -(dM_dpprz_right * eff_sched_var.cosr + roll_roll_coeff_scaling * eff_sched_p.hover_roll_roll_coef[0] * eff_sched_var.wing_rotation_rad * eff_sched_var.wing_rotation_rad * eff_sched_var.airspeed * eff_sched_var.cosr) / eff_sched_var.Ixx;
   // Bound(roll_motor_p_eff_right, -1, -0.00001);
 
+  if (roll_motor_p_eff_right >= -ROLL_EFFECTIVENESS_CUTOFF) {
+    roll_motor_p_eff_right = 0;
+  }
+
   float roll_motor_p_eff_left = (dM_dpprz_left * eff_sched_var.cosr + roll_roll_coeff_scaling * eff_sched_p.hover_roll_roll_coef[0] * eff_sched_var.wing_rotation_rad * eff_sched_var.wing_rotation_rad * eff_sched_var.airspeed * eff_sched_var.cosr) / eff_sched_var.Ixx;
   if(autopilot.in_flight) {
     float roll_motor_airspeed_compensation = eff_sched_p.hover_roll_roll_coef[1] * eff_sched_var.airspeed * eff_sched_var.cosr / eff_sched_var.Ixx;
     roll_motor_p_eff_left += roll_motor_airspeed_compensation;
   }
   // Bound(roll_motor_p_eff_left, 0.00001, 1);
+
+  if (roll_motor_p_eff_left <= ROLL_EFFECTIVENESS_CUTOFF) {
+    roll_motor_p_eff_left = 0;
+  }
 
   float roll_motor_q_eff = (eff_sched_p.hover_roll_pitch_coef[0] * eff_sched_var.wing_rotation_rad + eff_sched_p.hover_roll_pitch_coef[1] * eff_sched_var.wing_rotation_rad * eff_sched_var.wing_rotation_rad * eff_sched_var.sinr) / eff_sched_var.Iyy;
   Bound(roll_motor_q_eff, 0, 1);
